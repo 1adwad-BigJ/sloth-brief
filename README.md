@@ -1,53 +1,43 @@
 # Sloth Brief
 
-A small local AI assistant that turns accumulated text notes into five or fewer
-source-linked actions. Built for the DEV Week 3 “Slow and Steady” theme.
+Turn accumulated text notes into at most five source-linked actions with a local open-weight model. Built for DEV Week 3, Slow and Steady.
 
-## Run
+## Quick start: no Ollama required
 
-Python 3.10+ and a locally running Ollama with an open-weight model are required.
-No Python dependencies, cloud keys or paid services. Install Ollama from its
-official site and choose a model whose license you accept. Default model is
-`qwen2.5:0.5b`. Model downloads require internet and disk space; subsequent
-inference runs locally. Do not use a cloud-backed model for private notes.
+Python 3.10+ is required. Create and activate a virtual environment, then:
 
 ```sh
-ollama pull qwen2.5:0.5b
-python sloth.py examples/notes --output brief.md
+pip install -r requirements.txt
+python demo.py
 python -m unittest -v
 ```
 
-The output must not already exist. Inputs are never modified. Only top-level
-`.txt` files are read; symlinks are skipped. Limits: 20 files, 16 KB per file,
-24,000 total characters. Requests go only to loopback, without environment proxies.
+The demo contains two synthetic notes and writes a new `demo-verified.md`. Delete or rename that output yourself before repeating the demo. The first run downloads approximately 1 GB of public Qwen weights; later runs use the cache. CPU execution is supported. No payment account, hosted inference, or API key is required.
 
-## Why open AI
-
-The model performs semantic consolidation; rules alone cannot connect arbitrary
-notes into useful actions. Ollama and swappable open-weight models let users
-keep text on their machine and inspect or replace the inference layer.
-
-## Limitations
-
-Source IDs are validated, but citations do not prove semantic accuracy. Review
-the source notes. Prompt injection can influence a summary; the model has no
-tools, filesystem writes or execution powers. Output is plain Markdown and
-should not be rendered with unrestricted HTML. Model inference is not yet
-verified on this workstation; automated tests cover validation and file handling.
-
-Created with Codex assistance. Synthetic demo inputs contain no client data.
-See DEV-SUBMISSION.md for the unpublished contest draft.
-
-## Direct Transformers runtime (no Ollama server)
+For your own folder of UTF-8 text notes:
 
 ```sh
-python -m venv .venv
-# Activate the environment, then:
-pip install -r requirements.txt
-python sloth.py examples/notes --runtime transformers --model Qwen/Qwen2.5-0.5B-Instruct --output brief.md
+python sloth.py my-notes --runtime transformers --model Qwen/Qwen2.5-0.5B-Instruct --output brief.md
 ```
 
-The first run downloads public Apache-2.0 Qwen weights from Hugging Face.
-No hosted inference or payment account is used. Notes remain local. Model source:
-https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct
+Optional Ollama runtime, if already installed with a local model:
+
+```sh
+python sloth.py my-notes --model qwen2.5:0.5b --output brief.md
+```
+
+## Boundaries
+
+Inputs are never modified. Output is exclusively created, never overwritten. Only top-level .txt files are read; symlinks are skipped. Limits: 20 files, 16 KB each, 24,000 total characters. Ollama requests use loopback with proxies disabled. Transformers runs in-process; downloads contact Hugging Face but notes are processed locally. Use local, not cloud-backed, Ollama models.
+
+Source IDs are validated and source hashes appear in the output. This does not prove semantic accuracy: read the original notes before acting. Notes are untrusted model inputs; prompt injection may affect summaries, but the model has no tools or execution powers. Render Markdown without unrestricted HTML.
+
+## Open technology and verification
+
+Model: https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct (Apache-2.0).
+Runtime: Hugging Face Transformers and PyTorch; optional Ollama.
+Code: MIT, see LICENSE. Built with Codex assistance.
+
+Eight automated tests pass. Real CPU inference on two synthetic notes was verified on 2026-10-23; see demo-verified.md and demo-model-response.json. Transformers mode accepts at most five notes, summarizes each separately and assigns its source in code. It does not merge related notes across files. The demo has no fake fallback.
+
 Repository: https://github.com/1adwad-BigJ/sloth-brief

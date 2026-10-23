@@ -8,8 +8,8 @@ notes = [
 ]
 model = 'Qwen/Qwen2.5-0.5B-Instruct'
 if __name__ == '__main__':
-    actions = infer_transformers(notes, model)
+    actions = infer_transformers(notes, model, trace='demo-model-response.json')
     result = render(actions, notes, model)
-    with Path('demo-result.md').open('x', encoding='utf-8') as target:
+    with Path('demo-verified.md').open('x', encoding='utf-8') as target:
         target.write(result)
     print(result)
